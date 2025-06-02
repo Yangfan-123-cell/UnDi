@@ -1,21 +1,18 @@
 #!/bin/bash
-
 # custom config
 DATASET=$1
 CFG=$2  # config file
 ALMETHOD=$3 # Active learning method (random, entropy, coreset, badge)
 SEED=$4 # SEED number 
-MODE=$5 # [none, AS, AE]
-
-DATA=./DATA
-
+MODE=${5:-none} # [none, AS, AE] - defaults to 'none' if not provided
+DATA=./path/to/your/datasets/
 TRAINER=ALVLM
 CTP="end"  # class token position (end or middle)
 NCTX=16  # number of context tokens
 SHOTS=-1  # number of shots (1, 2, 4, 8, 16)
 CSC=True  # class-specific context (False or True)
-
 DIR=output/${DATASET}/${TRAINER}/${CFG}_${SHOTS}shots/nctx${NCTX}_csc${CSC}_ctp${CTP}_al${ALMETHOD}_mode${MODE}/seed${SEED}
+
 if [ -d "$DIR" ]; then
     echo "Oops! The results exist at ${DIR} (so skip this job)"
 elif [ "$MODE" = "AS" ]; then
