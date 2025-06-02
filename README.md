@@ -12,6 +12,12 @@ Pre-trained vision-language models (VLMs) like CLIP demonstrate strong zero-shot
 
 **UnDi** addresses these limitations by combining uncertainty estimation with diversity-based selection to maximize the effectiveness of limited annotation budgets.
 
+**Framework**
+<p align="center">
+  <img src="framework.jpg" alt="UnDi Framework" width="800">
+</p>
+Figure: Overview of the UnDi framework showing the uncertainty and diversity-based selection process for active learning in vision-language models.
+
 ## ✨ Key Features
 
 - **Multi-dimensional Uncertainty Scoring**: Integrates sample entropy, prediction confidence, and variability for robust uncertainty evaluation
@@ -139,3 +145,5 @@ output/${DATASET}/${TRAINER}/${CFG}_${SHOTS}shots/nctx${NCTX}_csc${CSC}_ctp${CTP
 
 
 ⭐ If you find this project useful, please consider giving it a star!
+
+This work builds upon the [PCB](https://github.com/kaist-dmlab/pcb) project - we appreciate their contributions to the field
