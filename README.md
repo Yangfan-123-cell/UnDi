@@ -68,7 +68,7 @@ Ensure your datasets are organized within the `./DATA` directory as specified in
 Run experiments using the main script located in `/scripts/alvlm/`:
 
 ```bash
-bash ./scripts/alvlm/main.sh <DATASET> <CFG> <ALMETHOD> <SEED> <MODE>
+bash ./scripts/alvlm/main.sh <DATASET> <CFG> <ALMETHOD> <SEED>
 ```
 
 **Parameters:**
@@ -76,28 +76,28 @@ bash ./scripts/alvlm/main.sh <DATASET> <CFG> <ALMETHOD> <SEED> <MODE>
 - `CFG`: Configuration file (`vit_b32,vit_b16,rn50,rn101`)
 - `ALMETHOD`: Active learning method (`learnability` for our method)
 - `SEED`: Random seed for reproducibility
-- `MODE`: Mode (`none`)
+
 
 ### Examples
 
 **Run UnDi on EuroSAT dataset:**
 ```bash
-bash ./scripts/alvlm/main.sh eurosat vit_b32 learnability 1 none
+bash ./scripts/alvlm/main.sh eurosat vit_b32 learnability 1
 ```
 
 **Run baseline methods:**
 ```bash
 # Entropy-based selection
-bash ./scripts/alvlm/main.sh eurosat vit_b32 entropy 1 none
+bash ./scripts/alvlm/main.sh eurosat vit_b32 entropy 1
 
 # Random selection
-bash ./scripts/alvlm/main.sh eurosat vit_b32 random 1 none
+bash ./scripts/alvlm/main.sh eurosat vit_b32 random 1
 
 # CoreSet method
-bash ./scripts/alvlm/main.sh eurosat vit_b32 coreset 1 none
+bash ./scripts/alvlm/main.sh eurosat vit_b32 coreset 1
 
 # BADGE method
-bash ./scripts/alvlm/main.sh eurosat vit_b32 badge 1 none
+bash ./scripts/alvlm/main.sh eurosat vit_b32 badge 1
 ```
 
 ## 📁 Important Projects Structure
