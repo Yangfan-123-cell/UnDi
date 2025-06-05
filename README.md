@@ -6,11 +6,10 @@
 
 This repository contains the official PyTorch implementation for **UnDi**, a novel active learning method for vision-language models that strategically selects samples based on both uncertainty and diversity.
 
-## 🚀 Overview
+## 🚀 Abstrate
 
-Pre-trained vision-language models (VLMs) like CLIP demonstrate strong zero-shot capabilities but often underperform fully supervised models in domain-specific vision tasks. While prompt tuning can enhance VLM performance with lower computational costs, selecting the most informative samples for annotation in an active learning setting remains challenging.
+Pre-trained vision-language models (VLMs) such as CLIP demonstrate strong zero-shot capabilities, yet they still underperform fully supervised models in domain-specific vision tasks. Model adaptation is an effective approach that reduces this performance gap with lower computational cost by fine-tuning only a small subset of model parameters while keeping the pre-trained backbone frozen, while selecting appropriate samples to further enhance VLM performance remains an ignored barrier. Active Learning (AL) offers a promising solution by selecting a small subset of unlabeled data for annotation. Previous methods mainly focus on uncertainty or diversity. However, they fail to balance both at the same time. To solve this, in this work, we propose UnDi, a novel method that achieves both **Un**certainty and **Di**versity for selecting samples. First, UnDi introduces a scoring mechanism that jointly considers sample confidence, variability, and entropy to assess sample uncertainty. Second, to further promote diversity and avoid redundancy, UnDi applies K-Means clustering on high-uncertainty candidate samples to gain sample diversity. Furthermore, we regard the AL question as a semi-supervised learning problem as there are many unlabeled samples available. To better utilize the knowledge inside unlabeled sample, UnDi leverages CLIP to generate pseudo-labels together with confidence-based filter to ensure the quality of pseudo labels. Extensive experiments on multiple image classification datasets show that UnDi significantly outperforms existing AL baselines under both with and without unlabeled samples scenarios.
 
-**UnDi** addresses these limitations by combining uncertainty estimation with diversity-based selection to maximize the effectiveness of limited annotation budgets.
 
 **Framework**
 <p align="center">
