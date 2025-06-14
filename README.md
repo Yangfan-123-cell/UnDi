@@ -111,10 +111,10 @@ UnDi/
 │   └── alvlm/              # Main.sh
 │   └── coop/               # Prompt tuning
     ...
-├── trainers/               # Execution scripts
+├── trainers/               
 │   └── _ptcache_/          
-│   └── active_learning/    # Active learning approaches
-│   └── alvlm.py/           # Main code for this project
+│   └── active_learning/    # Active learning approaches(you can add your project in it)
+│   └── alvlm.py/           # Main code for this project(you can change the way of training in it)
     ...
 ├── DATA/                   # You can put your datasets in it
 ├── requirements.txt        # Python dependencies
