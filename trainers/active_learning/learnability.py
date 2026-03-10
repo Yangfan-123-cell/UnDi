@@ -51,7 +51,7 @@ class Learnability(AL):
                 n_domain=self.cfg.DATALOADER.TRAIN_X.N_DOMAIN,
                 n_ins=self.cfg.DATALOADER.TRAIN_X.N_INS,
                 tfm=build_transform(self.cfg, is_train=False),
-                is_train=False,
+                is_train=True,
             )
             entropies = np.array([])  # 初始化熵得分数组
             labels = np.array([])  # 初始化标签数组
