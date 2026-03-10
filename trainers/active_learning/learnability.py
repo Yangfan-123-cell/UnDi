@@ -9,30 +9,15 @@ from .AL import AL
 
 
 class Learnability(AL):
-    """基于伪标签、多轮训练置信度和变异性的样本选择类，继承自 AL 类"""
 
     def __init__(self, cfg, model, unlabeled_dst, U_index, n_class, device, num_epochs=10, **kwargs):
-        """
-        初始化 Learnability 类
-        参数:
-            cfg: 配置文件对象，包含数据加载和模型参数
-            model: 当前训练的神经网络模型
-            unlabeled_dst: 未标记数据集，包含未标记样本
-            U_index: 未标记样本的全局索引列表
-            n_class: 数据集的类别数
-            device: 计算设备（如 'cuda' 或 'cpu'）
-            num_epochs: 用于计算置信度和变异性的训练周期数
-            **kwargs: 其他可选参数，传递给父类
-        """
         super().__init__(cfg, model, unlabeled_dst, U_index, n_class, **kwargs)
         self.device = device
-        self.num_epochs = num_epochs  # 训练周期数
-        self._uncertainty_scores = None  # 保存最近计算的不确定性得分
-        self.pseudo_threshold = 0.99  # 伪标签的置信度阈值
-        # 熵阈值定义 - 用于区分高熵和低熵样本
-        self.high_entropy_threshold = 0.8  # 归一化熵 > 0.7 为高熵
-        self.low_entropy_threshold = 0.4 # 归一化熵 < 0.3 为低熵
-        # 每个簇选择的样本数
+        self.num_epochs = num_epochs
+        self._uncertainty_scores = None 
+        self.pseudo_threshold = 0.99
+        self.high_entropy_threshold = 0.8
+        self.low_entropy_threshold = 0.4
         self.samples_per_cluster = 3
 
     def rank_uncertainty(self):
@@ -87,7 +72,6 @@ class Learnability(AL):
         log_c = np.log(self.n_class)
         normalized_entropies = entropies / log_c
 
-        # 保存熵、标签、预测概率和最大概率预测标签信息以便后续使用
         self._uncertainty_scores = entropies
         self._normalized_entropies = normalized_entropies
         self._sample_labels = labels if len(labels) > 0 else None
@@ -98,14 +82,7 @@ class Learnability(AL):
         return entropies
 
     def rank_learnability(self):
-        """
-        计算未标记样本的置信度和变异性
-
-        返回:
-            confidences: 每个未标记样本的置信度（预测最大概率的均值）
-            variabilities: 每个未标记样本的变异性（预测最大概率的标准差）
-        """
-        self.model.eval()  # 设置模型为评估模式
+        self.model.eval()
         selection_loader = build_data_loader(
             self.cfg,
             data_source=self.unlabeled_set,
@@ -116,7 +93,7 @@ class Learnability(AL):
             is_train=False,
         )
 
-        all_epoch_preds = []  # 存储每个样本在每个周期的预测概率
+        all_epoch_preds = []
         print("| 开始多轮预测以计算未标记集的置信度和变异性")
         for epoch in range(self.num_epochs):
             epoch_preds = []  # 当前周期的预测概率
@@ -148,15 +125,7 @@ class Learnability(AL):
         return confidences, variabilities
 
     def get_features(self, indices):
-        """
-        获取指定样本的特征表示，用于多样性选择
 
-        参数:
-            indices: 样本索引列表
-
-        返回:
-            features: 样本的特征矩阵
-        """
         self.model.eval()
         features = []
         with torch.no_grad():
@@ -174,7 +143,6 @@ class Learnability(AL):
         return np.vstack(features)
 
     def get_sample_labels(self):
-        """获取样本标签（如果有的话）"""
         if not hasattr(self, '_sample_labels') or self._sample_labels is None:
             # 尝试从 self.unlabeled_set 中提取标签
             labels = []
@@ -187,13 +155,7 @@ class Learnability(AL):
         return self._sample_labels
 
     def assign_pseudo_labels(self):
-        """
-        为高置信度样本分配伪标签
 
-        返回:
-            pseudo_indices: 被分配伪标签的样本索引
-            pseudo_labels: 对应的伪标签
-        """
         if not hasattr(self, '_pred_max_probs'):
             # 需要先计算一次预测
             self.rank_uncertainty()
@@ -207,23 +169,8 @@ class Learnability(AL):
         return high_conf_indices, pseudo_labels
 
     def run(self, n_cand):
-        """
-        执行样本选择过程:
-        1. 先选择高置信度样本分配伪标签
-        2. 剩余样本进行变异性和熵的综合评分
-        3. 使用K-means聚类，每个簇选择top5样本
-        4. 统计选择样本中高熵和低熵样本的数量
 
-        参数:
-            n_cand: 候选样本数量
-
-        返回:
-            selection_result: 选择的样本索引（相对于未标记集）
-            scores: 所有未标记样本的可学习性得分
-        """
-        # 获取类别数作为聚类数
         n_query = self.n_class
-        # 每个簇选择样本数设为5
         samples_per_cluster = self.samples_per_cluster
         print(f"| 类别数量 n_query: {n_query}")
         print(f"| 候选样本数量 n_cand: {n_cand}")
@@ -349,7 +296,6 @@ class Learnability(AL):
                 # 合并伪标签样本和聚类选择的样本
                 selection_result = list(pseudo_indices) + cluster_selections
 
-                # 统计伪标签样本的熵分布
                 pseudo_high_entropy = 0
                 pseudo_low_entropy = 0
                 pseudo_medium_entropy = 0
@@ -367,53 +313,30 @@ class Learnability(AL):
                     f"| 伪标签样本熵分布: 高熵 {pseudo_high_entropy}, 低熵 {pseudo_low_entropy}, 中等熵 {pseudo_medium_entropy}")
                 print(f"| 聚类选择样本熵分布: 高熵 {entropy_stats['high_entropy_count']}, "
                       f"低熵 {entropy_stats['low_entropy_count']}, 中等熵 {entropy_stats['medium_entropy_count']}")
-
-                # 保存簇统计信息以便后续分析
                 self._cluster_entropy_stats = cluster_entropy_stats
             else:
-                # 如果所有样本都用于伪标签，则只返回伪标签样本
                 selection_result = list(pseudo_indices)
         else:
-            # 如果所有样本都用于伪标签，则只返回伪标签样本
             selection_result = list(pseudo_indices)
 
         print(f"| 最终选择了 {len(selection_result)} 个样本，其中 {len(pseudo_indices)} 个伪标签样本")
 
-        # 保存伪标签信息，以便在select方法中返回
         self._pseudo_selection = pseudo_selection
-
-        # 保存熵统计信息
         self._entropy_stats = entropy_stats
 
         return selection_result, self._uncertainty_scores
 
     def select(self, n_cand, **kwargs):
-        """
-        选择指定数量的候选样本并返回其全局索引
-        参数:
-            n_cand: 候选样本数量（通常为数据集大小的一个百分比，如10%）
-        返回:
-            Q_index: 选择的样本在全局数据集中的索引
-        """
-        # 每次 select 前都重新计算不确定性，确保与当前 unlabeled_set 同步
         self._uncertainty_scores = self.rank_uncertainty()
-
-        # 获取置信度、变异性、聚类等综合策略选样
         selected_indices, scores = self.run(n_cand)
-
-        # 获取样本标签（如果有）
         sample_labels = self.get_sample_labels()
-
-        # 处理伪标签样本（如果在run中有生成）
         if hasattr(self, '_pseudo_selection'):
-            # 为伪标签样本添加标记，以便后续处理
             pseudo_samples = set(self._pseudo_selection["indices"])
             pseudo_labels_map = dict(zip(self._pseudo_selection["indices"], self._pseudo_selection["labels"]))
         else:
             pseudo_samples = set()
             pseudo_labels_map = {}
 
-        # 构造选择样本信息
         selection_data = {
             "local_index": selected_indices,
             "global_index": [self.U_index[idx] for idx in selected_indices],
@@ -424,16 +347,12 @@ class Learnability(AL):
                 else sample_labels[idx] for idx in selected_indices
             ],
             "is_pseudo": [idx in pseudo_samples for idx in selected_indices]
-        }
 
-        # 添加熵统计信息（如果存在）
         if hasattr(self, '_entropy_stats'):
             selection_data["entropy_stats"] = self._entropy_stats
 
-        # 添加聚类统计信息（如果存在）
         if hasattr(self, '_cluster_entropy_stats'):
             selection_data["cluster_stats"] = self._cluster_entropy_stats
 
-        # 返回全局索引
         Q_index = selection_data["global_index"]
         return Q_index
